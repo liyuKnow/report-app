@@ -54,6 +54,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamed(context, '/');
+          },
+        ),
         centerTitle: true,
         title: const Text("Update user"),
       ),
@@ -109,7 +115,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
 
       updateUser.firstName = _userFirstNameController.text;
       updateUser.lastName = _userLastNameController.text;
-      updateUser.updated = true;
+      updateUser.updated = 1;
 
       // Update User
       await Provider.of<DatabaseProvider>(context, listen: false)
@@ -132,18 +138,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
 
         await Provider.of<DatabaseProvider>(context, listen: false)
             .addUpdateLocation(updateLocation);
-        print("Lat : ${updateLocation.lat}");
       } catch (e) {
         print(e.toString());
       }
-
-      print(" User Data : ${user?.firstName}");
-      print(" User Data : ${user?.lastName}");
-      print(" User Data : ${user?.age}");
-      print(" User Data : ${user?.date}");
-      print(" User Data : ${user?.id}");
-      print(" User Data : ${user?.updated}");
-      print("Everything seems fine!");
     }
   }
 }

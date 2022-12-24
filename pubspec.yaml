@@ -22,6 +22,7 @@ dependencies:
   spreadsheet_decoder: ^2.1.1
   mobile_scanner: ^2.1.0
   location: ^4.4.0
+  syncfusion_flutter_xlsio: ^20.1.61-beta
 
 dev_dependencies:
   flutter_test:

@@ -3,7 +3,7 @@ class User {
   String firstName;
   String lastName;
   int age;
-  bool? updated;
+  int? updated;
   String date;
 
   User({
@@ -19,6 +19,7 @@ class User {
         id: json['id'],
         firstName: json['firstName'],
         lastName: json['lastName'],
+        updated: json['updated'],
         age: json['age'],
         date: json['date'],
       );
@@ -27,6 +28,7 @@ class User {
         'id': id,
         'firstName': firstName,
         'lastName': lastName,
+        'updated': updated,
         'age': age,
         'date': date,
       };

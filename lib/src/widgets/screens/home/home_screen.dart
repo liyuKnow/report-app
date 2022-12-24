@@ -1,12 +1,13 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as XLSIO;
+import 'package:provider/provider.dart';
+import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 import 'package:final_report/src/data/helper/db_helper.dart';
 import 'package:final_report/src/data/models/models.dart';
-import 'package:flutter/material.dart';
 import 'package:final_report/src/widgets/screens/home/all_users_list.dart';
 import 'package:final_report/src/controllers/permissions_controller.dart';
-import 'package:provider/provider.dart';
-import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 enum MenuItems { import, export, sync }
 
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (value == MenuItems.import) {
           loadData();
         } else if (value == MenuItems.export) {
+          _exportData();
         } else if (value == MenuItems.sync) {}
       },
       itemBuilder: ((context) => [
@@ -136,11 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO  : delete previos data and reset db index
     try {
       provider.truncateTables();
-    } catch (e) {
-      print("/* -------------------------------------------------------- */");
-      print(e);
-    }
-    // TODO  : get insert provider function (iterative or single)
+    } catch (e) {}
 
     for (var i = 1; i < rowDetail.length; i++) {
       var data = rowDetail[i].split(',');
@@ -161,27 +159,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // TODO  : return to list with new data
     Navigator.pushNamed(context, '/');
-
-    // final List<UserCompanion> entities = [];
-    // for (var i = 1; i < rowDetail.length; i++) {
-    //   var data = rowDetail[i].split(',');
-
-    //   final entity = UserCompanion(
-    //       firstName: drift.Value(data[1]),
-    //       lastName: drift.Value(data[2]),
-    //       gender: drift.Value(data[3]),
-    //       country: drift.Value(data[4]),
-    //       age: drift.Value(int.parse(data[5])));
-
-    //   entities.add(entity);
-    // }
-    // db.clearDatabase();
-    // db.insertMany(entities);
-
-    // db.close();
   }
 
-  static pickFile() {
-    print("File Picker Logic");
+  Future<void> _exportData() async {
+    // ^ export current database data to downloads folder
+    final provider = Provider.of<DatabaseProvider>(context, listen: false);
+    // Create a new Excel document.
+    final XLSIO.Workbook workbook = XLSIO.Workbook();
+    //Accessing worksheet via index.
+    final XLSIO.Worksheet sheet = workbook.worksheets[0];
+
+    // ADD THE HEADERS
+    sheet.getRangeByName('A1').setText('FirstName');
+    sheet.getRangeByName('B1').setText('LastName');
+    sheet.getRangeByName('C1').setText('Updated');
+    sheet.getRangeByName('D1').setText('Age');
+    sheet.getRangeByName('E1').setText('Date');
+
+    // GET ALL DATA FROM OBJECT BOX
+    List<User> allUsers = await provider.fetchUsers();
+
+    for (var i = 2; i < allUsers.length; i++) {
+      sheet.getRangeByName('A$i').setText((allUsers[i].firstName).toString());
+      sheet.getRangeByName('B$i').setText((allUsers[i].lastName).toString());
+      sheet.getRangeByName('C$i').setText((allUsers[i].updated).toString());
+      sheet.getRangeByName('D$i').setText((allUsers[i].age).toString());
+      sheet.getRangeByName('E$i').setText((allUsers[i].date).toString());
+    }
+
+    final List<int> bytes = workbook.saveAsStream();
+
+    final directory = Directory('/storage/emulated/0/Download/');
+    const fileName = "GeneratedUsersDownload.xlsx";
+    final file = File(directory.path + fileName);
+
+    file.writeAsBytes(bytes);
+
+    //Dispose the workbook.
+    workbook.dispose();
   }
 }

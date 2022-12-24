@@ -12,15 +12,22 @@ class UsersCard extends StatelessWidget {
     return GestureDetector(
       key: ValueKey(user.id),
       onTap: (() {
-        // Navigator.pushNamed(context, '/qr_screen', arguments: user.id);
         Navigator.pushNamed(context, '/edit_user', arguments: user.id);
       }),
       child: ListTile(
         title: Text("${user.firstName} ${user.lastName} id = ${user.id}"),
         subtitle: Text(
-            "${DateFormat('MMMM dd, yyyy').format(DateTime.parse(user.date))}, Updated = ${user.updated}"),
-        trailing: const Padding(
-            padding: EdgeInsets.all(2.0), child: Icon(Icons.qr_code_scanner)),
+          "${DateFormat('MMMM dd, yyyy').format(DateTime.parse(user.date))}, Updated = ${user.updated}",
+        ),
+        trailing: IconButton(
+          onPressed: () {
+            // go to qr page
+            Navigator.pushNamed(context, '/qr_screen', arguments: user.id);
+          },
+          icon: const Icon(
+            Icons.qr_code_scanner,
+          ),
+        ),
       ),
     );
   }

@@ -25,6 +25,9 @@ class DatabaseProvider with ChangeNotifier {
   User? _user;
   User? get user => _user;
 
+  UpdateLocation? _updateLocation;
+  UpdateLocation? get updateLocation => _updateLocation;
+
   // COMPLETES OUR DATABASE CREATION
   Database? _database;
   Future<Database> get database async {
@@ -101,6 +104,28 @@ class DatabaseProvider with ChangeNotifier {
 
   // CRUD OPERATIONS
   Future<List<User>> fetchAllUsers() async {
+    // get the database
+    final db = await database;
+    return await db.transaction((txn) async {
+      return await txn.query(userTable, where: "updated == 0").then((data) {
+        // 'data' is our fetched value
+        // convert it from "Map<String, object>" to "Map<String, dynamic>"
+        final converted = List<Map<String, dynamic>>.from(data);
+        // create a 'ExpenseCategory'from every 'map' in this 'converted'
+        List<User> nList = List.generate(
+            converted.length,
+            (index) => User.fromJson(
+                  converted[index],
+                ));
+        // set the value of 'categories' to 'nList'
+        _users = nList;
+        // return the '_categories'
+        return _users;
+      });
+    });
+  }
+
+  Future<List<User>> fetchUsers() async {
     // get the database
     final db = await database;
     return await db.transaction((txn) async {
@@ -198,6 +223,20 @@ class DatabaseProvider with ChangeNotifier {
 
     notifyListeners();
     return _user;
+  }
+
+  Future<UpdateLocation?> getUpdatedLocationByUserId(int userId) async {
+    final db = await database;
+
+    var result = await db.rawQuery(
+        'SELECT * FROM $updateLocationTable WHERE userId=?', [userId]);
+
+    final converted = UpdateLocation.fromJson(result[0]);
+
+    _updateLocation = converted;
+
+    notifyListeners();
+    return _updateLocation;
   }
 
   Future<void> updateUser(User user) async {
